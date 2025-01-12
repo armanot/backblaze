@@ -59,8 +59,9 @@ async function resizeImage(file, width, height) {
 async function uploadImage(fileBlob, customFilename) {
     const formData = new FormData();
     formData.append('file', fileBlob, `${customFilename}.jpg`);
+    const API_URL = 'https://backblaze.onrender.com';
 
-    const response = await fetch('http://localhost:3000/upload', {
+    const response = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         body: formData,
     });
