@@ -4,7 +4,7 @@ const cors = require('cors');
 const BackblazeB2 = require('backblaze-b2');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 // Configure Multer for file uploads
 const upload = multer(); // Default storage (in-memory)
