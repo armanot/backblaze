@@ -32,9 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = cameraInput.files[0];
         const siteName = document.getElementById('sitename').value.trim();
         const customFilename = document.getElementById('customFilename').value.trim();
+        const widthInches = parseFloat(document.getElementById('width').value.trim());
+        const heightInches = parseFloat(document.getElementById('height').value.trim());
+        const dpi = parseInt(document.getElementById('dpi').value.trim());
 
-        if (!file || !siteName || !customFilename) {
-            alert('Please take a picture and fill out all fields.');
+        if (!file || !siteName || !customFilename || !widthInches || !heightInches || !dpi) {
+            alert('Please fill out all fields and select an image.');
             return;
         }
 
@@ -43,22 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Convert inches to pixels
+        const widthPixels = Math.round(widthInches * dpi);
+        const heightPixels = Math.round(heightInches * dpi);
+
         // Combine sitename, filename, and location into the final filename
         const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
 
         try {
-            // Display status
             statusElement.textContent = 'Resizing image...';
-            const resizedImageBlob = await resizeImage(file, 800, 600);
 
-            // Show preview
+            // Resize the image based on user input
+            const resizedImageBlob = await resizeImage(file, widthPixels, heightPixels);
+
             await displayPreview(resizedImageBlob);
 
-            // Update status
             statusElement.textContent = 'Uploading image...';
             const result = await uploadImage(resizedImageBlob, finalFilename);
 
-            // Show success message
             statusElement.innerHTML = `Uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
         } catch (error) {
             console.error('Error occurred during upload:', error.message);
