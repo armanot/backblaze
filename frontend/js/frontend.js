@@ -3,6 +3,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadForm = document.getElementById('uploadForm');
     const previewCanvas = document.getElementById('previewCanvas');
     const statusElement = document.getElementById('status');
+    const coordinatesElement = document.getElementById('coordinates');
+
+    let latitude = null;
+    let longitude = null;
+
+    // Detect user location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                latitude = position.coords.latitude.toFixed(6);
+                longitude = position.coords.longitude.toFixed(6);
+                coordinatesElement.textContent = `Lat: ${latitude}, Lon: ${longitude}`;
+            },
+            (error) => {
+                console.error('Error getting location:', error.message);
+                coordinatesElement.textContent = 'Unable to detect location';
+            }
+        );
+    } else {
+        coordinatesElement.textContent = 'Geolocation not supported';
+    }
 
     // Handle form submission
     uploadForm.addEventListener('submit', async (e) => {
@@ -17,7 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const finalFilename = `${siteName}-${customFilename}`; // Combine sitename and custom filename
+        if (!latitude || !longitude) {
+            alert('Location not detected. Please allow location access.');
+            return;
+        }
+
+        // Combine sitename, filename, and location into the final filename
+        const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
 
         try {
             // Display status
