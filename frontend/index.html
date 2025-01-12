@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resize and Upload Image</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/frontend.js" defer></script>
+</head>
+<body>
+    <h1>Resize and Upload Image</h1>
+    
+    <form id="uploadForm">
+        <label for="fileInput">Select Image:</label>
+        <input type="file" id="fileInput" accept="image/*" required />
+
+        <label for="customFilename">Custom Filename:</label>
+        <input type="text" id="customFilename" placeholder="Enter a custom filename" required />
+
+        <button type="submit">Upload Resized Image</button>
+    </form>
+
+    <p id="status"></p>
+    <canvas id="preview" hidden></canvas>
+</body>
+</html>
+
