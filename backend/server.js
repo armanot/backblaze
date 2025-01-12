@@ -32,7 +32,24 @@ const b2 = new BackblazeB2({
 })();
 
 // Enable CORS for frontend communication
-app.use(cors({ origin: 'https://backblaze.onrender.com' })); // Replace with your frontend domain
+app.use((req, res, next) => {
+    const allowedOrigins = ['https://armanot.github.io', 'http://localhost:3000']; // Add all valid origins
+    const origin = req.headers.origin;
+
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
 
 // File upload endpoint
 app.post('/upload', upload.single('file'), async (req, res) => {
@@ -51,7 +68,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
         res.status(200).json({
             message: 'File uploaded successfully!',
-            fileUrl: `https://f${response.data.downloadHost}/file/${response.data.fileName}`,
+            fileUrl: `https://f${response.data.downloadHost}/file/${process.env.BACKBLAZE_BUCKET_ID}/${req.file.originalname}`,
         });
     } catch (error) {
         console.error('Upload error:', error.message);
