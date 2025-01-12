@@ -9,12 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const file = cameraInput.files[0];
-        const customFilename = document.getElementById('customFilename').value;
+        const siteName = document.getElementById('sitename').value.trim();
+        const customFilename = document.getElementById('customFilename').value.trim();
 
-        if (!file || !customFilename) {
-            alert('Please take a picture and enter a filename.');
+        if (!file || !siteName || !customFilename) {
+            alert('Please take a picture and fill out all fields.');
             return;
         }
+
+        const finalFilename = `${siteName}-${customFilename}`; // Combine sitename and custom filename
 
         try {
             // Display status
@@ -26,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update status
             statusElement.textContent = 'Uploading image...';
-            const result = await uploadImage(resizedImageBlob, customFilename);
+            const result = await uploadImage(resizedImageBlob, finalFilename);
 
             // Show success message
             statusElement.innerHTML = `Uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
@@ -75,9 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Upload the image
-    async function uploadImage(fileBlob, customFilename) {
+    async function uploadImage(fileBlob, finalFilename) {
         const formData = new FormData();
-        formData.append('file', fileBlob, `${customFilename}.jpg`);
+        formData.append('file', fileBlob, `${finalFilename}.jpg`);
 
         const API_URL = 'https://backblaze.onrender.com';
 
