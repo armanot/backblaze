@@ -32,7 +32,7 @@ const b2 = new BackblazeB2({
 })();
 
 // Enable CORS for frontend communication
-app.use(cors({ origin: 'https://your-frontend.onrender.com' })); // Replace with your frontend domain
+app.use(cors({ origin: 'https://backblaze.onrender.com' })); // Replace with your frontend domain
 
 // File upload endpoint
 app.post('/upload', upload.single('file'), async (req, res) => {
