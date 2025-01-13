@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("User not logged in, showing login form...");
         displayLoginForm();
     } else {
-        console.log("User already logged in, showing app content...");
-        displayAppContent();
+        console.log("User already logged in, initializing app...");
+        initializeAppFeatures(); // Initialize app-specific features
     }
 
     // Handle login form submission
@@ -24,15 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
-        console.log("Attempting login with username:", username);
-
         if (username === fixedUsername && password === fixedPassword) {
-            console.log("Login successful!");
             sessionStorage.setItem("loggedIn", "true");
             sessionStorage.setItem("username", username);
-            displayAppContent();
+            window.location.reload(); // Reload the page to initialize the app
         } else {
-            console.error("Invalid credentials provided.");
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = 'Invalid credentials. Please try again.';
             errorMessage.style.display = 'block';
@@ -57,36 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     text-align: center;
                     max-width: 400px;
                     width: 100%;">
-                    <h2 style="margin-bottom: 1.5rem; color: #333;">Login</h2>
-                    <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div>
-                            <label for="username" style="display: block; text-align: left; margin-bottom: 0.5rem;">Username:</label>
-                            <input type="text" id="username" required style="
-                                width: 100%;
-                                padding: 0.5rem;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                font-size: 1rem;">
-                        </div>
-                        <div>
-                            <label for="password" style="display: block; text-align: left; margin-bottom: 0.5rem;">Password:</label>
-                            <input type="password" id="password" required style="
-                                width: 100%;
-                                padding: 0.5rem;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                font-size: 1rem;">
-                        </div>
-                        <button type="submit" style="
-                            padding: 0.75rem;
-                            background-color: #007bff;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-size: 1rem;
-                            cursor: pointer;">
-                            Login
-                        </button>
+                    <h2>Login</h2>
+                    <form id="login-form">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" required />
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required />
+                        <button type="submit">Login</button>
                     </form>
                     <p id="error-message" style="color: red; margin-top: 1rem; display: none;">Invalid credentials. Please try again.</p>
                 </div>
@@ -96,77 +69,167 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('login-form').addEventListener('submit', handleLogin);
     }
 
-    // Display the app content
-    function displayAppContent() {
-        document.body.innerHTML = `
-            <header>
-                <h1>SnapSync v3.0</h1>
-                <p>Capture, Upload, and Map Your Snapshots</p>
-                <button id="logout-button" style="float: right;">Logout</button>
-            </header>
-            <section>
-                <h2>Take a Picture and Upload</h2>
-                <form id="uploadForm">
-                    <label for="cameraInput">Take a Picture:</label>
-                    <input type="file" id="cameraInput" accept="image/*" capture="environment" required />
-                    <label for="sitename">Site Name:</label>
-                    <input type="text" id="sitename" placeholder="Enter site name" required />
-                    <label for="customFilename">Custom Filename:</label>
-                    <input type="text" id="customFilename" placeholder="Enter a custom filename" required />
-                    <label for="width">Width (inches):</label>
-                    <input type="number" id="width" placeholder="e.g., 3.4" step="0.1" value="3.4" required />
-                    <label for="height">Height (inches):</label>
-                    <input type="number" id="height" placeholder="e.g., 3.4" step="0.1" value="3.4" required />
-                    <label for="dpi">DPI (dots per inch):</label>
-                    <input type="number" id="dpi" placeholder="e.g., 72 or 300" value="72" required />
-                    <button type="submit">Upload Image</button>
-                </form>
-                <canvas id="previewCanvas" hidden></canvas>
-                <p id="status"></p>
-            </section>
-        `;
-        document.getElementById('logout-button').addEventListener('click', handleLogout);
-        initializeAppFeatures();
-    }
-
-    // Logout function
-    function handleLogout() {
-        console.log("User logged out.");
-        sessionStorage.clear();
-        alert("Logged out successfully!");
-        displayLoginForm();
-    }
-
     // Initialize app-specific features
     function initializeAppFeatures() {
-        console.log("Initializing app features...");
         const cameraInput = document.getElementById('cameraInput');
         const uploadForm = document.getElementById('uploadForm');
+        const previewCanvas = document.getElementById('previewCanvas');
         const statusElement = document.getElementById('status');
-
-        // Add more logic for upload and app-specific features hereconst mapContainer = document.getElementById('mapContainer');
+        const coordinatesElement = document.getElementById('coordinates');
+        const generateMapButton = document.getElementById('generateMap');
+        const saveMapButton = document.getElementById('saveMap');
+        const mapContainer = document.getElementById('mapContainer');
         const mapStatusElement = document.getElementById('mapStatus');
+        const sitenameInput = document.getElementById('sitename');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
 
-        // Example: Add functionality for upload and map generation
-        uploadForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            console.log("Uploading image...");
-            // Implement upload logic here
-            statusElement.textContent = "Image uploaded successfully!";
+        let latitude = null;
+        let longitude = null;
+        let map = null;
+
+        // Set default site name
+        const defaultSitename = `Site_${new Date().toISOString().split('T')[0]}`;
+        sitenameInput.value = defaultSitename;
+
+        // Detect user location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    latitude = position.coords.latitude.toFixed(6);
+                    longitude = position.coords.longitude.toFixed(6);
+                    coordinatesElement.textContent = `Lat: ${latitude}, Lon: ${longitude}`;
+                    latitudeInput.value = latitude;
+                    longitudeInput.value = longitude;
+                },
+                (error) => {
+                    coordinatesElement.textContent = 'Unable to detect location';
+                }
+            );
+        } else {
+            coordinatesElement.textContent = 'Geolocation not supported';
+        }
+
+        // Handle form submission for image upload
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = cameraInput.files[0];
+            const siteName = sitenameInput.value.trim();
+            const customFilename = document.getElementById('customFilename').value.trim();
+            const widthInches = parseFloat(document.getElementById('width').value.trim());
+            const heightInches = parseFloat(document.getElementById('height').value.trim());
+            const dpi = parseInt(document.getElementById('dpi').value.trim());
+
+            if (!file || !siteName || !customFilename || !widthInches || !heightInches || !dpi) {
+                alert('Please fill out all fields and select an image.');
+                return;
+            }
+
+            if (!latitude || !longitude) {
+                alert('Location not detected. Please allow location access.');
+                return;
+            }
+
+            const widthPixels = Math.round(widthInches * dpi);
+            const heightPixels = Math.round(heightInches * dpi);
+            const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
+
+            try {
+                statusElement.textContent = 'Resizing image...';
+                const resizedImageBlob = await resizeImage(file, widthPixels, heightPixels);
+
+                statusElement.textContent = 'Uploading image...';
+                await uploadImage(resizedImageBlob, finalFilename);
+
+                statusElement.textContent = 'Uploaded successfully!';
+            } catch (error) {
+                statusElement.textContent = `Error: ${error.message}`;
+            }
         });
 
-        document.getElementById('generateMap').addEventListener('click', () => {
-            console.log("Generating map...");
-            // Implement map generation logic here
-            mapStatusElement.textContent = "Map generated successfully!";
+        // Function to resize the image
+        async function resizeImage(file, width, height) {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            await new Promise((resolve) => (img.onload = resolve));
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            URL.revokeObjectURL(img.src);
+
+            return new Promise((resolve) => {
+                canvas.toBlob(resolve, 'image/jpeg', 0.8);
+            });
+        }
+
+        // Function to upload the image
+        async function uploadImage(fileBlob, filename) {
+            const formData = new FormData();
+            formData.append('file', fileBlob, `${filename}.jpg`);
+
+            const API_URL = 'https://backblaze.onrender.com';
+            const response = await fetch(`${API_URL}/upload-and-email`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Upload failed: ${response.statusText}`);
+            }
+
+            return response.json();
+        }
+
+        // Generate Map
+        generateMapButton.addEventListener('click', () => {
+            const mapLatitude = parseFloat(latitudeInput.value);
+            const mapLongitude = parseFloat(longitudeInput.value);
+            const mapZoom = parseInt(document.getElementById('zoom').value, 10);
+
+            if (isNaN(mapLatitude) || isNaN(mapLongitude) || isNaN(mapZoom)) {
+                alert('Please enter valid latitude, longitude, and zoom level.');
+                return;
+            }
+
+            if (map) {
+                map.remove();
+            }
+
+            map = L.map(mapContainer).setView([mapLatitude, mapLongitude], mapZoom);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors',
+            }).addTo(map);
+
+            L.marker([mapLatitude, mapLongitude]).addTo(map).bindPopup('Selected Location').openPopup();
+            mapStatusElement.textContent = 'Map generated successfully!';
         });
 
-        document.getElementById('saveMap').addEventListener('click', () => {
-            console.log("Saving map...");
-            // Implement map saving logic here
-            mapStatusElement.textContent = "Map saved successfully!";
+        // Save Map
+        saveMapButton.addEventListener('click', async () => {
+            if (!map) {
+                alert('Please generate the map first.');
+                return;
+            }
+
+            try {
+                const canvas = await html2canvas(mapContainer, { useCORS: true });
+                const mapBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1.0));
+
+                const siteName = sitenameInput.value.trim();
+                const finalFilename = `map-${siteName}-${latitude}_${longitude}`;
+
+                mapStatusElement.textContent = 'Uploading map image...';
+                await uploadImage(mapBlob, finalFilename);
+
+                mapStatusElement.textContent = 'Map image uploaded successfully!';
+            } catch (error) {
+                mapStatusElement.textContent = 'Error saving the map image.';
+            }
         });
     }
 });
-
-   
