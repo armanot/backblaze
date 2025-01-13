@@ -1,110 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.title = 'SnapSync';
 
-    // Fixed login credentials
-    const fixedUsername = "snapuser";
-    const fixedPassword = "snappass";
+    const cameraInput = document.getElementById('cameraInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const statusElement = document.getElementById('status');
+    const coordinatesElement = document.getElementById('coordinates');
+    const generateMapButton = document.getElementById('generateMap');
+    const saveMapButton = document.getElementById('saveMap');
+    const mapContainer = document.getElementById('mapContainer');
+    const mapStatusElement = document.getElementById('mapStatus');
+    const sitenameInput = document.getElementById('sitename');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
 
-    // Check if user is logged in
-    if (sessionStorage.getItem("loggedIn") !== "true") {
-        displayLoginForm();
-    } else {
-        displayAppContent();
-    }
-
-    // Handle login form submission
-    function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        if (username === fixedUsername && password === fixedPassword) {
-            sessionStorage.setItem("loggedIn", "true");
-            sessionStorage.setItem("username", username);
-            displayAppContent();
-        } else {
-            document.getElementById('error-message').textContent = 'Invalid credentials. Please try again.';
-            document.getElementById('error-message').style.display = 'block';
-        }
-    }
-
-    // Display login form
-    function displayLoginForm() {
-        document.body.innerHTML = `
-            <div id="login-container">
-                <h2>Login</h2>
-                <form id="login-form">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" required />
-                    <br />
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" required />
-                    <br />
-                    <button type="submit">Login</button>
-                </form>
-                <p id="error-message" style="color: red; display: none;">Invalid credentials. Please try again.</p>
-            </div>
-        `;
-
-        document.getElementById('login-form').addEventListener('submit', handleLogin);
-    }
-
-    // Display the app content
-    function displayAppContent() {
-        document.body.innerHTML = `
-            <header>
-                <h1>SnapSync v3.0</h1>
-                <p>Capture, Upload, and Map Your Snapshots</p>
-                <button id="logout-button" style="float: right;">Logout</button>
-            </header>
-            <!-- Include the rest of your app HTML here -->
-            <section>
-                <h2>Take a Picture and Upload</h2>
-                <form id="uploadForm">
-                    <!-- Upload form fields -->
-                </form>
-                <canvas id="previewCanvas" hidden></canvas>
-                <p id="status"></p>
-            </section>
-            <section>
-                <h2>Generate Map and Save as Image</h2>
-                <div>
-                    <button id="generateMap">Generate Map</button>
-                    <button id="saveMap">Save Map as Image</button>
-                </div>
-                <div id="mapContainer"></div>
-                <p id="mapStatus"></p>
-            </section>
-        `;
-
-        document.getElementById('logout-button').addEventListener('click', handleLogout);
-        initializeAppFeatures(); // Reinitialize all your existing app logic
-    }
-
-    // Logout function
-    function handleLogout() {
-        sessionStorage.clear();
-        alert("Logged out successfully!");
-        displayLoginForm();
-    }
-
-    // Your existing app logic
-    function initializeAppFeatures() {
-        const cameraInput = document.getElementById('cameraInput');
-        const uploadForm = document.getElementById('uploadForm');
-        const previewCanvas = document.getElementById('previewCanvas');
-        const statusElement = document.getElementById('status');
-        const coordinatesElement = document.getElementById('coordinates');
-        const generateMapButton = document.getElementById('generateMap');
-        const saveMapButton = document.getElementById('saveMap');
-        const mapContainer = document.getElementById('mapContainer');
-        const mapStatusElement = document.getElementById('mapStatus');
-        const sitenameInput = document.getElementById('sitename');
-        const latitudeInput = document.getElementById('latitude');
-        const longitudeInput = document.getElementById('longitude');
-
-        // (Insert the rest of your app logic here)
-        let latitude = null;
+    let latitude = null;
     let longitude = null;
     let map = null;
 
@@ -274,5 +184,4 @@ document.addEventListener('DOMContentLoaded', () => {
             mapStatusElement.textContent = 'Error saving the map image.';
         }
     });
-}
 });
