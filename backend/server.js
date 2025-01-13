@@ -91,7 +91,8 @@ app.post('/upload-and-email', upload.single('file'), async (req, res) => {
             from: process.env.EMAIL_USER,
             to: 'armanot@gmail.com', // Replace with recipient's email
             subject: 'Your Map Image from SnapSync',
-            text: `Hello! Your map image is ready. You can download it here: ${fileUrl}`,
+            // text: `Hello! Your map image is ready. You can download it here: ${fileUrl}`,
+            text: `Your map image is ready. File is as attached`,
             attachments: [
                 {
                     filename: req.file.originalname,
@@ -104,7 +105,7 @@ app.post('/upload-and-email', upload.single('file'), async (req, res) => {
 
         res.status(200).json({
             message: 'File uploaded and email sent successfully!',
-            fileUrl,
+            // fileUrl,
         });
     } catch (error) {
         console.error('Error:', error.message);
