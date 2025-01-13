@@ -217,4 +217,38 @@ document.addEventListener('DOMContentLoaded', () => {
             mapStatusElement.textContent = 'Error saving the map image.';
         }
     });
+
+    generateMapButton.addEventListener('click', () => {
+        const mapLatitude = parseFloat(latitudeInput.value);
+        const mapLongitude = parseFloat(longitudeInput.value);
+        const mapZoom = parseInt(document.getElementById('zoom').value, 10);
+    
+        if (isNaN(mapLatitude) || isNaN(mapLongitude) || isNaN(mapZoom)) {
+            alert('Please enter valid latitude, longitude, and zoom level.');
+            return;
+        }
+    
+        if (map) {
+            map.remove();
+        }
+    
+        map = L.map(mapContainer).setView([mapLatitude, mapLongitude], mapZoom);
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    
+        L.marker([mapLatitude, mapLongitude]).addTo(map)
+            .bindPopup('Selected Location')
+            .openPopup();
+    
+        mapStatusElement.textContent = 'Map generated successfully!';
+    
+        // Listen for zoom changes and update the zoom input field
+        map.on('zoomend', () => {
+            const currentZoom = map.getZoom();
+            document.getElementById('zoom').value = currentZoom;
+        });
+    });
 });
