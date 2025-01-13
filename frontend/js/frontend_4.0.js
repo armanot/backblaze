@@ -42,54 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display login form
     function displayLoginForm() {
         document.body.innerHTML = `
-            <div id="login-container" style="
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background-color: #f4f4f9;
-                font-family: Arial, sans-serif;">
-                <div style="
-                    background: white;
-                    padding: 2rem;
-                    border-radius: 8px;
-                    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                    max-width: 400px;
-                    width: 100%;">
-                    <h2 style="margin-bottom: 1.5rem; color: #333;">Login</h2>
-                    <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div>
-                            <label for="username" style="display: block; text-align: left; margin-bottom: 0.5rem;">Username:</label>
-                            <input type="text" id="username" required style="
-                                width: 100%;
-                                padding: 0.5rem;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                font-size: 1rem;">
-                        </div>
-                        <div>
-                            <label for="password" style="display: block; text-align: left; margin-bottom: 0.5rem;">Password:</label>
-                            <input type="password" id="password" required style="
-                                width: 100%;
-                                padding: 0.5rem;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                font-size: 1rem;">
-                        </div>
-                        <button type="submit" style="
-                            padding: 0.75rem;
-                            background-color: #007bff;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            font-size: 1rem;
-                            cursor: pointer;">
-                            Login
-                        </button>
-                    </form>
-                    <p id="error-message" style="color: red; margin-top: 1rem; display: none;">Invalid credentials. Please try again.</p>
-                </div>
+            <div id="login-container">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required />
+                    <br />
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required />
+                    <br />
+                    <button type="submit">Login</button>
+                </form>
+                <p id="error-message" style="color: red; display: none;">Invalid credentials. Please try again.</p>
             </div>
         `;
 
@@ -124,9 +88,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 <canvas id="previewCanvas" hidden></canvas>
                 <p id="status"></p>
             </section>
+            <section>
+                <h2>Generate Map and Save as Image</h2>
+                <div>
+                    <label for="latitude">Latitude:</label>
+                    <input type="number" id="latitude" placeholder="Detecting latitude..." required>
+                    <label for="longitude">Longitude:</label>
+                    <input type="number" id="longitude" placeholder="Detecting longitude..." required>
+                    <label for="zoom">Zoom Level:</label>
+                    <input type="number" id="zoom" placeholder="Enter zoom level" value="12" required>
+                    <button id="generateMap">Generate Map</button>
+                    <button id="saveMap">Save Map as Image</button>
+                </div>
+                <div id="mapContainer"></div>
+                <p id="mapStatus"></p>
+            </section>
         `;
+
         document.getElementById('logout-button').addEventListener('click', handleLogout);
-        initializeAppFeatures();
+        initializeAppFeatures(); // Initialize app-specific features
     }
 
     // Logout function
@@ -143,8 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cameraInput = document.getElementById('cameraInput');
         const uploadForm = document.getElementById('uploadForm');
         const statusElement = document.getElementById('status');
-
-        // Add more logic for upload and app-specific features hereconst mapContainer = document.getElementById('mapContainer');
+        const mapContainer = document.getElementById('mapContainer');
         const mapStatusElement = document.getElementById('mapStatus');
 
         // Example: Add functionality for upload and map generation
@@ -169,4 +148,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-   
