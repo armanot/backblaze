@@ -4,14 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewCanvas = document.getElementById('previewCanvas');
     const statusElement = document.getElementById('status');
     const coordinatesElement = document.getElementById('coordinates');
-    const generateMapButton = document.getElementById('generateMap');
-    const saveMapButton = document.getElementById('saveMap');
-    const mapContainer = document.getElementById('mapContainer');
-    const mapStatusElement = document.getElementById('mapStatus');
 
     let latitude = null;
     let longitude = null;
-    let map = null;
 
     // Detect user location
     if (navigator.geolocation) {
@@ -30,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         coordinatesElement.textContent = 'Geolocation not supported';
     }
 
-    // Handle form submission for image upload
+    // Handle form submission
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -55,11 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const widthPixels = Math.round(widthInches * dpi);
         const heightPixels = Math.round(heightInches * dpi);
 
+        // Combine sitename, filename, and location into the final filename
         const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
 
         try {
             statusElement.textContent = 'Resizing image...';
 
+            // Resize the image based on user input
             const resizedImageBlob = await resizeImage(file, widthPixels, heightPixels);
 
             await displayPreview(resizedImageBlob);
@@ -74,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Resize the image
     async function resizeImage(file, width, height) {
         const img = new Image();
         img.src = URL.createObjectURL(file);
@@ -91,10 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(img.src);
 
         return new Promise((resolve) => {
-            canvas.toBlob(resolve, 'image/jpeg', 0.8);
+            canvas.toBlob(resolve, 'image/jpeg', 0.8); // Adjust quality if needed
         });
     }
 
+    // Display the image preview
     async function displayPreview(blob) {
         const ctx = previewCanvas.getContext('2d');
         const img = new Image();
@@ -110,9 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(img.src);
     }
 
-    async function uploadImage(fileBlob, filename) {
+    // Upload the image
+    async function uploadImage(fileBlob, finalFilename) {
         const formData = new FormData();
-        formData.append('file', fileBlob, `${filename}.jpg`);
+        formData.append('file', fileBlob, `${finalFilename}.jpg`);
 
         const API_URL = 'https://backblaze.onrender.com';
 
@@ -127,57 +127,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return response.json();
     }
-
-    // Generate map
-    generateMapButton.addEventListener('click', () => {
-        const mapLatitude = parseFloat(document.getElementById('latitude').value);
-        const mapLongitude = parseFloat(document.getElementById('longitude').value);
-        const mapZoom = parseInt(document.getElementById('zoom').value, 10);
-
-        if (isNaN(mapLatitude) || isNaN(mapLongitude) || isNaN(mapZoom)) {
-            alert('Please enter valid latitude, longitude, and zoom level.');
-            return;
-        }
-
-        if (map) {
-            map.remove();
-        }
-
-        map = L.map(mapContainer).setView([mapLatitude, mapLongitude], mapZoom);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        L.marker([mapLatitude, mapLongitude]).addTo(map)
-            .bindPopup('Selected Location')
-            .openPopup();
-
-        mapStatusElement.textContent = 'Map generated successfully!';
-    });
-
-    // Save map as an image
-    saveMapButton.addEventListener('click', async () => {
-        if (!map) {
-            alert('Please generate the map first.');
-            return;
-        }
-
-        try {
-            const canvas = await html2canvas(mapContainer);
-            const mapBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1.0));
-
-            const siteName = document.getElementById('sitename').value.trim();
-            const customFilename = `map-${siteName}-${Date.now()}`;
-
-            mapStatusElement.textContent = 'Uploading map image...';
-            const result = await uploadImage(mapBlob, customFilename);
-
-            mapStatusElement.innerHTML = `Map image uploaded successfully! <a href="${result.fileUrl}" target="_blank">View Map</a>`;
-        } catch (error) {
-            console.error('Error uploading the map image:', error.message);
-            mapStatusElement.textContent = 'Error uploading the map image.';
-        }
-    });
 });
