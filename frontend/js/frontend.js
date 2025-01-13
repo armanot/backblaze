@@ -8,10 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveMapButton = document.getElementById('saveMap');
     const mapContainer = document.getElementById('mapContainer');
     const mapStatusElement = document.getElementById('mapStatus');
+    const sitenameInput = document.getElementById('sitename');
 
     let latitude = null;
     let longitude = null;
     let map = null;
+
+    // Set default site name
+    const defaultSitename = `Site_${new Date().toISOString().split('T')[0]}`;
+    sitenameInput.value = defaultSitename;
 
     // Detect user location
     if (navigator.geolocation) {
@@ -35,12 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const file = cameraInput.files[0];
-        const siteName = document.getElementById('sitename').value.trim();
+        const siteName = sitenameInput.value.trim();
         const customFilename = document.getElementById('customFilename').value.trim();
         const widthInches = parseFloat(document.getElementById('width').value.trim());
         const heightInches = parseFloat(document.getElementById('height').value.trim());
         const dpi = parseInt(document.getElementById('dpi').value.trim());
 
+        // Validate fields
         if (!file || !siteName || !customFilename || !widthInches || !heightInches || !dpi) {
             alert('Please fill out all fields and select an image.');
             return;
@@ -165,19 +171,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // Ensure all map tiles are loaded
+            await new Promise((resolve, reject) => {
+                const tiles = mapContainer.querySelectorAll('.leaflet-tile');
+                let loadedCount = 0;
+                tiles.forEach((tile) => {
+                    if (tile.complete) {
+                        loadedCount++;
+                    } else {
+                        tile.addEventListener('load', () => {
+                            loadedCount++;
+                            if (loadedCount === tiles.length) resolve();
+                        });
+                        tile.addEventListener('error', () => reject(new Error('Failed to load some map tiles')));
+                    }
+                });
+
+                if (loadedCount === tiles.length) resolve();
+            });
+
             const canvas = await html2canvas(mapContainer);
             const mapBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1.0));
 
-            const siteName = document.getElementById('sitename').value.trim();
-            const customFilename = `map-${siteName}-${Date.now()}`;
+            const siteName = sitenameInput.value.trim();
+            const finalFilename = `map-${siteName}-${latitude}_${longitude}`;
 
             mapStatusElement.textContent = 'Uploading map image...';
-            const result = await uploadImage(mapBlob, customFilename);
+            const result = await uploadImage(mapBlob, finalFilename);
 
             mapStatusElement.innerHTML = `Map image uploaded successfully! <a href="${result.fileUrl}" target="_blank">View Map</a>`;
         } catch (error) {
-            console.error('Error uploading the map image:', error.message);
-            mapStatusElement.textContent = 'Error uploading the map image.';
+            console.error('Error saving the map image:', error.message);
+            mapStatusElement.textContent = 'Error saving the map image.';
         }
     });
 });
