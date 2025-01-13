@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Update project title dynamically
     document.title = 'SnapSync';
 
     const cameraInput = document.getElementById('cameraInput');
@@ -12,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapContainer = document.getElementById('mapContainer');
     const mapStatusElement = document.getElementById('mapStatus');
     const sitenameInput = document.getElementById('sitename');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
 
     let latitude = null;
     let longitude = null;
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSitename = `Site_${new Date().toISOString().split('T')[0]}`;
     sitenameInput.value = defaultSitename;
 
+
     // Detect user location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -28,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 latitude = position.coords.latitude.toFixed(6);
                 longitude = position.coords.longitude.toFixed(6);
                 coordinatesElement.textContent = `Lat: ${latitude}, Lon: ${longitude}`;
+                
+                // Prefill latitude and longitude inputs
+                latitudeInput.value = latitude;
+                longitudeInput.value = longitude;
             },
             (error) => {
                 console.error('Error getting location:', error.message);
@@ -139,8 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate map
     generateMapButton.addEventListener('click', () => {
-        const mapLatitude = parseFloat(document.getElementById('latitude').value);
-        const mapLongitude = parseFloat(document.getElementById('longitude').value);
+        const mapLatitude = parseFloat(latitudeInput.value);
+        const mapLongitude = parseFloat(longitudeInput.value);
         const mapZoom = parseInt(document.getElementById('zoom').value, 10);
 
         if (isNaN(mapLatitude) || isNaN(mapLongitude) || isNaN(mapZoom)) {
@@ -165,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mapStatusElement.textContent = 'Map generated successfully!';
     });
+
 
     // Save map as an image
     saveMapButton.addEventListener('click', async () => {
