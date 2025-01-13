@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     text-align: center;
                     max-width: 400px;
                     width: 100%;">
-                    <h2>Login</h2>
+                    <h2>SnapSync Login v5.0</h2>
                     <form id="login-form">
                         <label for="username">Username:</label>
                         <input type="text" id="username" required />
