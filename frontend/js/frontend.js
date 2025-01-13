@@ -82,7 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             statusElement.textContent = 'Uploading image...';
             const result = await uploadImage(resizedImageBlob, finalFilename);
 
-            statusElement.innerHTML = `Uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
+            // statusElement.innerHTML = `Uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
+            statusElement.innerHTML = `Uploaded successfully!`;
         } catch (error) {
             console.error('Error occurred during upload:', error.message);
             statusElement.textContent = `Error: ${error.message}`;
