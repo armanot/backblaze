@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const defaultSitename = `Site_${new Date().toISOString().split('T')[0]}`;
     sitenameInput.value = defaultSitename;
 
-
     // Detect user location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -30,8 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 latitude = position.coords.latitude.toFixed(6);
                 longitude = position.coords.longitude.toFixed(6);
                 coordinatesElement.textContent = `Lat: ${latitude}, Lon: ${longitude}`;
-                
-                // Prefill latitude and longitude inputs
                 latitudeInput.value = latitude;
                 longitudeInput.value = longitude;
             },
@@ -55,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const heightInches = parseFloat(document.getElementById('height').value.trim());
         const dpi = parseInt(document.getElementById('dpi').value.trim());
 
-        // Validate fields
         if (!file || !siteName || !customFilename || !widthInches || !heightInches || !dpi) {
             alert('Please fill out all fields and select an image.');
             return;
@@ -66,15 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Convert inches to pixels
         const widthPixels = Math.round(widthInches * dpi);
         const heightPixels = Math.round(heightInches * dpi);
-
         const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
 
         try {
             statusElement.textContent = 'Resizing image...';
-
             const resizedImageBlob = await resizeImage(file, widthPixels, heightPixels);
 
             await displayPreview(resizedImageBlob);
@@ -82,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             statusElement.textContent = 'Uploading image...';
             const result = await uploadImage(resizedImageBlob, finalFilename);
 
-            // statusElement.innerHTML = `Uploaded successfully! <a href="${result.fileUrl}" target="_blank">View File</a>`;
             statusElement.innerHTML = `Uploaded successfully!`;
         } catch (error) {
             console.error('Error occurred during upload:', error.message);
@@ -93,17 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function resizeImage(file, width, height) {
         const img = new Image();
         img.src = URL.createObjectURL(file);
-
         await new Promise((resolve) => (img.onload = resolve));
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-
         canvas.width = width;
         canvas.height = height;
-
         ctx.drawImage(img, 0, 0, width, height);
-
         URL.revokeObjectURL(img.src);
 
         return new Promise((resolve) => {
@@ -111,28 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function displayPreview(blob) {
-        const ctx = previewCanvas.getContext('2d');
-        const img = new Image();
-        img.src = URL.createObjectURL(blob);
-
-        await new Promise((resolve) => (img.onload = resolve));
-
-        previewCanvas.width = img.width;
-        previewCanvas.height = img.height;
-        previewCanvas.hidden = false;
-
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(img.src);
-    }
-
     async function uploadImage(fileBlob, filename) {
         const formData = new FormData();
         formData.append('file', fileBlob, `${filename}.jpg`);
 
-        const API_URL = 'https://backblaze.onrender.com';
-
-        const response = await fetch(`${API_URL}/upload`, {
+        const API_URL = 'https://backblaze.onrender.com'; // Replace with your actual backend URL
+        const response = await fetch(`${API_URL}/upload-and-email`, {
             method: 'POST',
             body: formData,
         });
@@ -144,52 +116,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
     }
 
-    // Generate map
     generateMapButton.addEventListener('click', () => {
         const mapLatitude = parseFloat(latitudeInput.value);
         const mapLongitude = parseFloat(longitudeInput.value);
         const mapZoom = parseInt(document.getElementById('zoom').value, 10);
-    
+
         if (isNaN(mapLatitude) || isNaN(mapLongitude) || isNaN(mapZoom)) {
             alert('Please enter valid latitude, longitude, and zoom level.');
             return;
         }
-    
+
         if (map) {
-            map.remove(); // Remove the existing map to avoid reinitialization issues
+            map.remove();
         }
-    
-        // Initialize the map with the provided latitude, longitude, and zoom
+
         map = L.map(mapContainer).setView([mapLatitude, mapLongitude], mapZoom);
-    
-        // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+            attribution: '© OpenStreetMap contributors',
         }).addTo(map);
-    
-        // Add a marker to the map
-        L.marker([mapLatitude, mapLongitude]).addTo(map)
-            .bindPopup('Selected Location')
-            .openPopup();
-    
-        // Update status message
+
+        L.marker([mapLatitude, mapLongitude]).addTo(map).bindPopup('Selected Location').openPopup();
         mapStatusElement.textContent = 'Map generated successfully!';
-    
-        // Listen for zoom changes and update the zoom input field dynamically
+
         map.on('zoomend', () => {
             const currentZoom = map.getZoom();
-            const zoomInput = document.getElementById('zoom');
-    
-            // Update the zoom level visually and programmatically
-            zoomInput.value = currentZoom;
-            zoomInput.dispatchEvent(new Event('change')); // Trigger a change event for consistent behavior
+            document.getElementById('zoom').value = currentZoom;
         });
     });
-    
 
-
-    // Save map as an image
     saveMapButton.addEventListener('click', async () => {
         if (!map) {
             alert('Please generate the map first.');
@@ -197,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Ensure all map tiles are loaded
             await new Promise((resolve, reject) => {
                 const tiles = mapContainer.querySelectorAll('.leaflet-tile');
                 let loadedCount = 0;
@@ -212,13 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         tile.addEventListener('error', () => reject(new Error('Failed to load some map tiles')));
                     }
                 });
-
                 if (loadedCount === tiles.length) resolve();
             });
 
-            const canvas = await html2canvas(mapContainer, {
-                useCORS: true,
-            });
+            const canvas = await html2canvas(mapContainer, { useCORS: true });
             const mapBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1.0));
 
             const siteName = sitenameInput.value.trim();
@@ -227,12 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
             mapStatusElement.textContent = 'Uploading map image...';
             const result = await uploadImage(mapBlob, finalFilename);
 
-            mapStatusElement.innerHTML = `Map image uploaded successfully! <a href="${result.fileUrl}" target="_blank">View Map</a>`;
+            mapStatusElement.innerHTML = `Map image uploaded and emailed successfully!`;
         } catch (error) {
             console.error('Error saving the map image:', error.message);
             mapStatusElement.textContent = 'Error saving the map image.';
         }
     });
-
-    
 });
