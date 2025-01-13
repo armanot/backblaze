@@ -3,44 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Capture and Map Generator</title>
+    <title>SnapSync</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="js/frontend.js" defer></script>
+   
 </head>
 <body>
-    <h1>Camera Capture and Map Generator</h1>
+    <header>
+        <h1>SnapSync</h1>
+        <p>Capture, Upload, and Map Your Snapshots</p>
+    </header>
 
     <!-- Image Upload Section -->
     <section>
         <h2>Take a Picture and Upload</h2>
         <form id="uploadForm">
             <label for="cameraInput">Take a Picture:</label>
-            <input type="file" id="cameraInput" accept="image/*" capture="environment" required /><br/><br/>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" required />
 
             <label for="sitename">Site Name:</label>
-            <input type="text" id="sitename" placeholder="Enter site name" value="DefaultSite" required />
-            <br/><br/>
+            <input type="text" id="sitename" placeholder="Enter site name" required />
 
             <label for="customFilename">Custom Filename:</label>
-            <input type="text" id="customFilename" placeholder="Enter a custom filename" required /><br/><br/>
+            <input type="text" id="customFilename" placeholder="Enter a custom filename" required />
 
             <label for="width">Width (inches):</label>
-            <input type="number" id="width" placeholder="e.g., 3.4" step="0.1" value="3.4" required /><br/><br/>
+            <input type="number" id="width" placeholder="e.g., 3.4" step="0.1" value="3.4" required />
 
             <label for="height">Height (inches):</label>
-            <input type="number" id="height" placeholder="e.g., 3.4" step="0.1" value="3.4" required /><br/><br/>
+            <input type="number" id="height" placeholder="e.g., 3.4" step="0.1" value="3.4" required />
 
             <label for="dpi">DPI (dots per inch):</label>
-            <input type="number" id="dpi" placeholder="e.g., 72 or 300" value="72" required /><br/><br/>
+            <input type="number" id="dpi" placeholder="e.g., 72 or 300" value="72" required />
 
             <div id="location">
                 <strong>Detected Location:</strong>
                 <span id="coordinates">Detecting...</span>
             </div>
-            <br/><br/>
 
             <button type="submit">Upload Image</button>
         </form>
@@ -54,7 +56,7 @@
         <div>
             <label for="latitude">Latitude:</label>
             <input type="number" id="latitude" placeholder="Enter latitude" value="3.1390" required>
-            
+
             <label for="longitude">Longitude:</label>
             <input type="number" id="longitude" placeholder="Enter longitude" value="101.6869" required>
 
@@ -64,7 +66,7 @@
             <button id="generateMap">Generate Map</button>
             <button id="saveMap">Save Map as Image</button>
         </div>
-        <div id="mapContainer" style="width: 600px; height: 400px; margin-top: 20px;"></div>
+        <div id="mapContainer"></div>
         <p id="mapStatus"></p>
     </section>
 </body>

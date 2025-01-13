@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Update project title dynamically
+    document.title = 'SnapSync';
+
     const cameraInput = document.getElementById('cameraInput');
     const uploadForm = document.getElementById('uploadForm');
     const previewCanvas = document.getElementById('previewCanvas');
@@ -190,7 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loadedCount === tiles.length) resolve();
             });
 
-            const canvas = await html2canvas(mapContainer);
+            const canvas = await html2canvas(mapContainer, {
+                useCORS: true,
+            });
             const mapBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1.0));
 
             const siteName = sitenameInput.value.trim();
