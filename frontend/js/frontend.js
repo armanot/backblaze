@@ -178,9 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Listen for zoom changes and update the zoom input field dynamically
         map.on('zoomend', () => {
             const currentZoom = map.getZoom();
-            document.getElementById('zoom').value = currentZoom;
+            const zoomInput = document.getElementById('zoom');
+    
+            // Update the zoom level visually and programmatically
+            zoomInput.value = currentZoom;
+            zoomInput.dispatchEvent(new Event('change')); // Trigger a change event for consistent behavior
         });
     });
+    
 
 
     // Save map as an image
