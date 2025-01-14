@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const widthPixels = Math.round(widthInches * dpi);
             const heightPixels = Math.round(heightInches * dpi);
-            const finalFilename = `${siteName}-${customFilename}-${latitude}_${longitude}`;
+            const finalFilename = `image-${siteName}-${customFilename}-${latitude}_${longitude}`;
 
             try {
                 statusElement.textContent = 'Resizing image...';
