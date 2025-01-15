@@ -35,39 +35,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Display login form
-    function displayLoginForm() {
-        document.body.innerHTML = `
-            <div id="login-container" style="
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background-color: #f4f4f9;
-                font-family: Arial, sans-serif;">
-                <div style="
-                    background: white;
-                    padding: 2rem;
-                    border-radius: 8px;
-                    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                    max-width: 400px;
-                    width: 100%;">
-                    <h2>SnapSync Login</h2>
-                    <form id="login-form">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" required />
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" required />
-                        <button type="submit">Login</button>
-                    </form>
-                    <p id="error-message" style="color: red; margin-top: 1rem; display: none;">Invalid credentials. Please try again.</p>
-                </div>
+  // Display login form
+function displayLoginForm() {
+    document.body.innerHTML = `
+        <div id="login-container" style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;">
+            <div style="
+                background: white;
+                padding: 2rem;
+                border-radius: 8px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                max-width: 400px;
+                width: 100%;">
+                <h2>SnapSync Login</h2>
+                <form id="login-form">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required />
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required />
+                    <button type="submit">Login</button>
+                </form>
+                <p id="error-message" style="color: red; margin-top: 1rem; display: none;">Invalid credentials. Please try again.</p>
             </div>
-        `;
+        </div>
+        <div style="
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;">
+            SnapSync Version 6.0
+        </div>
+    `;
 
-        document.getElementById('login-form').addEventListener('submit', handleLogin);
-    }
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+}
+
 
     // Initialize app-specific features
     function initializeAppFeatures() {
