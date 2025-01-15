@@ -165,8 +165,8 @@ app.post('/upload-and-email', upload.single('file'), async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: 'armanot@gmail.com', // Replace with recipient's email
-            subject: 'Your Image File from SnapSync',
-            text: `Your image file is ready. File is as attached`,
+            subject: `Your Image File: ${req.file.originalname}`, // Include filename in the subject
+            text: `Your image file "${req.file.originalname}" is ready. File is attached.`,
             attachments: [
                 {
                     filename: req.file.originalname,
