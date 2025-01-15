@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - SnapSync</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script defer src="js/admin.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        <p>Manage SnapSync Users</p>
+    </header>
+    <section>
+        <h2>User Management</h2>
+        <div>
+            <h3>Add New User</h3>
+            <form id="addUserForm">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required />
+                <label for="password">Password:</label>
+                <input type="password" id="password" required />
+                <button type="submit">Add User</button>
+            </form>
+        </div>
+        <div>
+            <h3>Existing Users</h3>
+            <ul id="userList"></ul>
+        </div>
+    </section>
+</body>
+</html>

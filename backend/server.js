@@ -3,6 +3,8 @@ const multer = require('multer');
 const cors = require('cors');
 const BackblazeB2 = require('backblaze-b2');
 const nodemailer = require('nodemailer');
+const { Pool } = require('pg'); // PostgreSQL client
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
@@ -17,11 +19,34 @@ if (
     !process.env.BACKBLAZE_APPLICATION_KEY ||
     !process.env.BACKBLAZE_BUCKET_ID ||
     !process.env.EMAIL_USER ||
-    !process.env.EMAIL_PASS
+    !process.env.EMAIL_PASS ||
+    !process.env.PG_USER ||
+    !process.env.PG_HOST ||
+    !process.env.PG_DATABASE ||
+    !process.env.PG_PASSWORD ||
+    !process.env.PG_PORT
 ) {
     console.error('Missing required environment variables.');
     process.exit(1);
 }
+
+// Initialize PostgreSQL connection
+const pool = new Pool({
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: process.env.PG_PORT,
+    ssl: { rejectUnauthorized: false }, // Required for hosted PostgreSQL services like Render
+});
+
+pool.connect((err) => {
+    if (err) {
+        console.error('Error connecting to PostgreSQL:', err);
+    } else {
+        console.log('Connected to PostgreSQL');
+    }
+});
 
 // Initialize Backblaze B2 SDK
 const b2 = new BackblazeB2({
@@ -68,6 +93,58 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+// Login endpoint
+app.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        const user = result.rows[0];
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        res.status(200).json({
+            message: 'Login successful',
+            isAdmin: user.is_admin,
+        });
+    } catch (err) {
+        console.error('Error during login:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Example: Create a new user (for admin use)
+app.post('/users', async (req, res) => {
+    const { username, password, isAdmin } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query(
+            'INSERT INTO users (username, password, is_admin) VALUES ($1, $2, $3)',
+            [username, hashedPassword, isAdmin || false]
+        );
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (err) {
+        console.error('Error creating user:', err);
+        res.status(500).json({ error: 'Failed to create user' });
+    }
+});
+
+
 // File upload and email sending endpoint
 app.post('/upload-and-email', upload.single('file'), async (req, res) => {
     try {
@@ -91,7 +168,6 @@ app.post('/upload-and-email', upload.single('file'), async (req, res) => {
             from: process.env.EMAIL_USER,
             to: 'armanot@gmail.com', // Replace with recipient's email
             subject: 'Your Image File from SnapSync',
-            // text: `Hello! Your map image is ready. You can download it here: ${fileUrl}`,
             text: `Your image file is ready. File is as attached`,
             attachments: [
                 {
@@ -105,11 +181,21 @@ app.post('/upload-and-email', upload.single('file'), async (req, res) => {
 
         res.status(200).json({
             message: 'File uploaded and email sent successfully!',
-            // fileUrl,
         });
     } catch (error) {
         console.error('Error:', error.message);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Example endpoint to interact with PostgreSQL
+app.get('/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM users');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ error: 'Failed to fetch users' });
     }
 });
 
@@ -126,4 +212,3 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
 });
-
