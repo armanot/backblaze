@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     const userList = document.getElementById('userList');
     const addUserForm = document.getElementById('addUserForm');
+    const status = document.getElementById('status');
+
+    // Utility function to update the status message
+    function updateStatus(message, isError = false) {
+        status.textContent = message;
+        status.style.color = isError ? 'red' : 'green';
+        setTimeout(() => {
+            status.textContent = ''; // Clear the status message after 5 seconds
+        }, 5000);
+    }
 
     // Fetch and display users
     async function fetchUsers() {
@@ -17,8 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.appendChild(deleteButton);
                 userList.appendChild(li);
             });
+            updateStatus('User list updated');
         } catch (err) {
             console.error('Error fetching users:', err);
+            updateStatus('Failed to fetch user list', true);
         }
     }
 
@@ -36,15 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                alert('User added successfully');
+                updateStatus('User added successfully');
                 fetchUsers();
                 addUserForm.reset();
             } else {
                 const errorData = await response.json();
-                alert(`Error: ${errorData.error}`);
+                updateStatus(`Error: ${errorData.error}`, true);
             }
         } catch (err) {
             console.error('Error adding user:', err);
+            updateStatus('Failed to add user', true);
         }
     });
 
@@ -56,14 +69,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                alert('User deleted successfully');
+                updateStatus('User deleted successfully');
                 fetchUsers();
             } else {
                 const errorData = await response.json();
-                alert(`Error: ${errorData.error}`);
+                updateStatus(`Error: ${errorData.error}`, true);
             }
         } catch (err) {
             console.error('Error deleting user:', err);
+            updateStatus('Failed to delete user', true);
         }
     }
 

@@ -24,7 +24,8 @@ if (
     !process.env.PG_HOST ||
     !process.env.PG_DATABASE ||
     !process.env.PG_PASSWORD ||
-    !process.env.PG_PORT
+    !process.env.PG_PORT ||
+    !process.env.DATABASE_URL
 ) {
     console.error('Missing required environment variables.');
     process.exit(1);
